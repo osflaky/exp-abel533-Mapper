@@ -1,0 +1,31 @@
+name: Maven test
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  mvn_verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: ubuntu-latest
+          java: 17
+          arch: arm64
+          runner: ubuntu-24.04-arm
+          expander_leg: ubuntu-latest-17-arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Maven Central Repository
+      uses: actions/setup-java@v4
+      with:
+        java-version: '${{ matrix.java }}'
+        distribution: 'temurin'
+        architecture: '${{ matrix.arch }}'
+        cache: 'maven'
+    - name: Run the Maven verify phase
+      run: mvn --batch-mode --update-snapshots test
+    name: mvn_verify [${{ matrix.expander_leg }}]
+    timeout-minutes: 150
